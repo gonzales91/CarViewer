@@ -1,0 +1,112 @@
+﻿<script src="https://code.highcharts.com/highcharts.js"></script>
+<button id="btnCarReport" class="btn btn-info">Cars statistic</button>
+<button id="btnColorReport" class="btn btn-warning">Colors statistic</button>
+<a asp-action="index" class="btn btn-secondary" style="margin-left:10px">Back</a>
+<div id="container" style="min-width: 400px; height: 400px; margin: 0 auto">
+</div>
+<script>
+
+    $(document).ready(function () {
+        carReport();
+
+        $("#btnColorReport").click(function () {
+            colorReport();
+        })
+
+        $("#btnCarReport").click(function () {
+            carReport();
+        })
+    })
+
+    function carReport() {
+        var text = 'Car usage statistic';
+        var percent = '';
+
+        $.ajax({
+            type: "GET",
+            url: "/Home/CarUsageData",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (result) {
+                var keys = Object.keys(result);
+                var monthlydata = new Array();
+                for (var i = 0; i < keys.length; i++) {
+                    var arrL = new Array();
+                    arrL.push(keys[i]);
+                    arrL.push(result[keys[i]]);
+                    monthlydata.push(arrL);
+                }
+                createCharts(monthlydata, text, percent);
+            }
+        })
+    }
+
+    function colorReport() {
+        var text = 'Color usage statistic';
+        var percent = '%';
+
+        $.ajax({
+            type: "GET",
+            url: "/Home/ColorUsageData",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (result) {
+                var keys = Object.keys(result);
+                var weeklydata = new Array();
+                for (var i = 0; i < keys.length; i++) {
+                    var arrL = new Array();
+                    arrL.push(keys[i]);
+                    arrL.push(result[keys[i]]);
+                    weeklydata.push(arrL);
+                }
+                createCharts(weeklydata, text, percent);
+            }
+        })
+    }
+
+    function createCharts(sum, myTitle, percent) {
+        Highcharts.chart('container', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: myTitle
+            },
+            xAxis: {
+                type: 'category',
+                labels: {
+                    rotation: -45,
+                    style: {
+                        fontSize: '13px',
+                        fontFamily: 'Verdana, sans-serif'
+                    }
+                }
+            },
+
+            plotOptions: {
+                series: {
+                    borderWidth: 0,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.y}' + percent
+                    }
+                }
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'percent'
+                }
+            },
+            legend: {
+                enabled: false
+            },
+
+            series: [{
+                type: 'column',
+                data: sum,
+            }]
+        });
+    }
+
+</script>
